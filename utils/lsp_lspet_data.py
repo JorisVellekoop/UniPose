@@ -16,7 +16,7 @@ def read_data_file(root_dir):
     """get train or val images
         return: image list: train or val images list
     """
-    image_arr = np.array(glob.glob(os.path.join(root_dir, 'images/*.jpg')))
+    image_arr = np.array(glob.glob(os.path.join(root_dir, '*.jpg')))
     image_nums_arr = np.array([float(s.rsplit('/')[-1][2:-4]) for s in image_arr])
     sorted_image_arr = image_arr[np.argsort(image_nums_arr)]
     return sorted_image_arr.tolist()

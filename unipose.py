@@ -39,6 +39,7 @@ class Trainer(object):
         self.args         = args
         self.train_dir    = args.train_dir
         self.val_dir      = args.val_dir
+        self.test_dir     = args.test_dir
         self.model_arch   = args.model_arch
         self.dataset      = args.dataset
 
@@ -46,7 +47,7 @@ class Trainer(object):
         self.workers      = 1
         self.weight_decay = 0.0005
         self.momentum     = 0.9
-        self.batch_size   = 8
+        self.batch_size   = 4
         self.lr           = 0.0001
         self.gamma        = 0.333
         self.step_size    = 13275
@@ -60,8 +61,8 @@ class Trainer(object):
         elif self.dataset == "MPII":
             self.numClasses  = 16
 
-        self.train_loader, self.val_loader = getDataloader(self.dataset, self.train_dir,\
-            self.val_dir, self.sigma, self.stride, self.workers, self.batch_size)
+        self.train_loader, self.val_loader, self.test_loader = getDataloader(self.dataset, self.train_dir,
+            self.val_dir, self.test_dir, self.sigma, self.stride, self.workers, self.batch_size)
 
         model = unipose(self.dataset, num_classes=self.numClasses,backbone='resnet',output_stride=16,sync_bn=True,freeze_bn=False, stride=self.stride)
 
@@ -93,9 +94,9 @@ class Trainer(object):
         self.bestPCK  = 0
         self.bestPCKh = 0
 
-    # Print model summary and metrics
-    dump_input = torch.rand((1, 3, 368, 368]))
-    print(get_model_summary(self.modelmodel, dump_input))
+        # Print model summary and metrics
+        dump_input = torch.rand((1, 3, 368, 368))
+        # print(get_model_summary(self.model, dump_input))
 
     def training(self, epoch):
         train_loss = 0.0
@@ -103,7 +104,7 @@ class Trainer(object):
         print("Epoch " + str(epoch) + ':') 
         tbar = tqdm(self.train_loader)
 
-        for i, (input, heatmap, centermap, img_path) in enumerate(tbar):
+        for i, (input, heatmap, centermap, img_path, _, _) in enumerate(tbar):
             learning_rate = adjust_learning_rate(self.optimizer, self.iters, self.lr, policy='step',
                                                  gamma=self.gamma, step_size=self.step_size)
 
@@ -259,9 +260,10 @@ epochs        =  100
 args = parser.parse_args()
 
 if args.dataset == 'LSP':
-    args.train_dir  = '/PATH/TO/LSP/TRAIN'
-    args.val_dir    = '/PATH/TO/LSP/VAL'
-    args.pretrained = '/PATH/TO/WEIGHTS'
+    args.train_dir  = '/home/joris/CS4245 CV/LSP_dataset/images/test'
+    args.val_dir    = '/home/joris/CS4245 CV/LSP_dataset/images/validation'
+    args.test_dir   = '/home/joris/CS4245 CV/LSP_dataset/images/test'
+    args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
 elif args.dataset == 'MPII':
     args.train_dir  = '/PATH/TO/MPIII/TRAIN'
     args.val_dir    = '/PATH/TO/MPIII/VAL'
