@@ -142,7 +142,7 @@ class Trainer(object):
         count = np.zeros(self.numClasses+1)
 
         cnt = 0
-        for i, (input, heatmap, centermap, img_path) in enumerate(tbar):
+        for i, (input, heatmap, centermap, img_path, _, _) in enumerate(tbar):
 
             cnt += 1
 
@@ -201,10 +201,10 @@ class Trainer(object):
 
         for idx in range(1):
             print(idx,"/",2000)
-            img_path = '/PATH/TO/TEST/IMAGE'
+            img_path = self.test_dir + '/*.jpg'
+            img_path = '/home/joris/CS4245 CV/LSP_dataset/images/test/im1551.jpg'
 
             center   = [184, 184]
-
             img  = np.array(cv2.resize(cv2.imread(img_path),(368,368)), dtype=np.float32)
             img  = img.transpose(2, 0, 1)
             img  = torch.from_numpy(img)
@@ -224,7 +224,7 @@ class Trainer(object):
             heat = F.interpolate(heat, size=input_var.size()[2:], mode='bilinear', align_corners=True)
 
             kpts = get_kpts(heat, img_h=368.0, img_w=368.0)
-            draw_paint(img_path, kpts, idx, epoch, self.model_arch, self.dataset)
+            draw_paint(cv2.imread(img_path), kpts, idx, epoch, self.model_arch, self.dataset)
 
             heat = heat.detach().cpu().numpy()
 
@@ -251,7 +251,7 @@ parser.add_argument('--pretrained', default=None,type=str, dest='pretrained')
 parser.add_argument('--dataset', type=str, dest='dataset', default='LSP')
 parser.add_argument('--train_dir', default='/PATH/TO/TRAIN',type=str, dest='train_dir')
 parser.add_argument('--val_dir', type=str, dest='val_dir', default='/PATH/TO/LSP/VAL')
-parser.add_argument('--model_name', default=None, type=str)
+parser.add_argument('--model_name', default='LSP_model', type=str)
 parser.add_argument('--model_arch', default='unipose', type=str)
 
 starter_epoch =    0
@@ -263,15 +263,16 @@ if args.dataset == 'LSP':
     args.train_dir  = '/home/joris/CS4245 CV/LSP_dataset/images/test'
     args.val_dir    = '/home/joris/CS4245 CV/LSP_dataset/images/validation'
     args.test_dir   = '/home/joris/CS4245 CV/LSP_dataset/images/test'
-    args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
+    # args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
+    args.pretrained = '/home/joris/CS4245 CV/UniPose/LSP_model_best.pth.tar'
 elif args.dataset == 'MPII':
     args.train_dir  = '/PATH/TO/MPIII/TRAIN'
     args.val_dir    = '/PATH/TO/MPIII/VAL'
 
 trainer = Trainer(args)
-for epoch in range(starter_epoch, epochs):
-    trainer.training(epoch)
-    trainer.validation(epoch)
+# for epoch in range(starter_epoch, epochs):
+#     trainer.training(epoch)
+#     trainer.validation(epoch)
 	
 # Uncomment for inference, demo, and samples for the trained model:
-# trainer.test(0)
+trainer.test(0)

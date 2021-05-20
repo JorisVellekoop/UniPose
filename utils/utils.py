@@ -115,15 +115,15 @@ def draw_paint(im, kpts, mapNumber, epoch, model_arch, dataset):
 
     if dataset == "LSP":
         limbSeq = [[13, 12], [12, 9], [12, 8], [9, 10], [8, 7], [10,11], [7, 6], [12, 3],\
-                    [12, 2], [ 2, 1], [ 1, 0], [ 3, 4], [4,  5], [15,16], [16,18], [17,18], [15,17]]
-        kpts[15][0] = kpts[15][0]  - 25
-        kpts[15][1] = kpts[15][1]  - 50
-        kpts[16][0] = kpts[16][0]  - 25
-        kpts[16][1] = kpts[16][1]  + 50
-        kpts[17][0] = kpts[17][0] + 25
-        kpts[17][1] = kpts[17][1] - 50
-        kpts[18][0] = kpts[18][0] + 25
-        kpts[18][1] = kpts[18][1] + 50
+                    [12, 2], [ 2, 1], [ 1, 0], [ 3, 4], [4,  5]]#, [15,16], [16,18], [17,18], [15,17]]
+        # kpts[15][0] = kpts[15][0]  - 25
+        # kpts[15][1] = kpts[15][1]  - 50
+        # kpts[16][0] = kpts[16][0]  - 25
+        # kpts[16][1] = kpts[16][1]  + 50
+        # kpts[17][0] = kpts[17][0] + 25
+        # kpts[17][1] = kpts[17][1] - 50
+        # kpts[18][0] = kpts[18][0] + 25
+        # kpts[18][1] = kpts[18][1] + 50
 
 
     elif dataset == "MPII":
@@ -188,13 +188,11 @@ def draw_paint(im, kpts, mapNumber, epoch, model_arch, dataset):
 
         if X0!=0 and Y0!=0 and X1!=0 and Y1!=0:
             if i<len(limbSeq)-4:
-                cv2.line(cur_im, (Y0,X0), (Y1,X1), colors[i], 5)
+                cv2.line(im, (Y0,X0), (Y1,X1), colors[i], 5)
             else:
-                cv2.line(cur_im, (Y0,X0), (Y1,X1), [0,0,255], 5)
+                cv2.line(im, (Y0,X0), (Y1,X1), [0,0,255], 5)
 
-        im = cv2.addWeighted(im, 0.2, cur_im, 0.8, 0)
-
-    cv2.imwrite('samples/WASPpose/Pose/'+str(mapNumber)+'.png', im)
+    cv2.imwrite('samples/WASPpose/Pose'+str(mapNumber)+'.png', im)
 
 
 def guassian_kernel(size_w, size_h, center_x, center_y, sigma):
