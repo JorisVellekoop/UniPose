@@ -102,6 +102,7 @@ class Flic():
 
 flic = Flic("/images",1,1,None)
 
-image, heatmap, centermap, image_path, image2 = flic.__getitem__(20)
+image, heatmap, centermap, image_path, image2 = flic.__getitem__(200)
 plt.imshow(image.numpy())
+plt.show()
 
