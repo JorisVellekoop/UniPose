@@ -248,7 +248,7 @@ class Trainer(object):
         
 parser = argparse.ArgumentParser()
 parser.add_argument('--pretrained', default=None,type=str, dest='pretrained')
-parser.add_argument('--dataset', type=str, dest='dataset', default='LSP')
+parser.add_argument('--dataset', type=str, dest='dataset', default='FLIC')
 parser.add_argument('--train_dir', default='/PATH/TO/TRAIN',type=str, dest='train_dir')
 parser.add_argument('--val_dir', type=str, dest='val_dir', default='/PATH/TO/LSP/VAL')
 parser.add_argument('--model_name', default='LSP_model', type=str)
@@ -265,6 +265,12 @@ if args.dataset == 'LSP':
     args.test_dir   = '/home/joris/CS4245 CV/LSP_dataset/images/test'
     # args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
     args.pretrained = '/home/joris/CS4245 CV/UniPose/LSP_model_best.pth.tar'
+    
+elif args.dataset == "FLIC":
+    args.train_dir  = '/FLIC/images'
+    args.val_dir    = '/FLIC/images'
+    args.test_dir   = '/FLIC/images'
+    
 elif args.dataset == 'MPII':
     args.train_dir  = '/PATH/TO/MPIII/TRAIN'
     args.val_dir    = '/PATH/TO/MPIII/VAL'
