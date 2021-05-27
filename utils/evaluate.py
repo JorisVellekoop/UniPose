@@ -92,7 +92,7 @@ def accuracy(output, target, thr_PCK, thr_PCKh, dataset, hm_type='gaussian', thr
 	PCKh = np.zeros((len(idx)))
 	avg_PCKh = 0
 
-	if dataset == "LSP":
+	if dataset == "LSP" or dataset == "LSPet":
 		headLength = np.linalg.norm(target[0,14,:] - target[0,13,:])
 	elif dataset == "COCO":
 		headLength = np.linalg.norm(target[0,4,:] - target[0,5,:])
@@ -148,7 +148,7 @@ def accuracy(output, target, thr_PCK, thr_PCKh, dataset, hm_type='gaussian', thr
 		neck = [(target[0,6,0]+target[0,7,0])/2, (target[0,6,1]+target[0,7,1])/2]
 		torso  = np.linalg.norm(3*(target[0,1,0] - neck))
 
-	elif dataset == "LSP":
+	elif dataset == "LSP" or dataset == "LSPet":
 		pelvis = [(target[0,3,0]+target[0,4,0])/2, (target[0,3,1]+target[0,4,1])/2]
 		torso  = np.linalg.norm(target[0,13,:] - pelvis)
 

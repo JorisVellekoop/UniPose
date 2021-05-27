@@ -33,11 +33,11 @@ def read_mat_file(mode, root_dir, img_list):
     """
     mat_arr = scipy.io.loadmat(os.path.join(root_dir, 'joints.mat'))['joints']
     # lspnet (14,3,10000)
-    if mode == 'lspet':
+    if mode == 'LSPet':
         lms = mat_arr.transpose([2, 1, 0])
         kpts = mat_arr.transpose([2, 0, 1]).tolist()
     # lsp (3,14,2000)
-    if mode == 'lsp':
+    if mode == 'LSP':
         mat_arr[2] = np.logical_not(mat_arr[2])
         lms = mat_arr.transpose([2, 0, 1])
         kpts = mat_arr.transpose([2, 1, 0]).tolist()

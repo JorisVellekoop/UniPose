@@ -227,20 +227,20 @@ def get_max_preds(batch_heatmaps):
 
 
 def getDataloader(dataset, train_dir, val_dir, test_dir, sigma, stride, workers, batch_size):
-    if dataset == 'LSP':
+    if dataset == 'LSP' or dataset == 'LSPet':
         train_loader = torch.utils.data.DataLoader(
-                                            lsp_lspet_data.LSP_Data('lsp', train_dir, sigma, stride,
+                                            lsp_lspet_data.LSP_Data(dataset, train_dir, sigma, stride,
                                             Mytransforms.Compose([Mytransforms.RandomHorizontalFlip(),])),
                                             batch_size  = batch_size, shuffle=True,
                                             num_workers = workers, pin_memory=True)   
     
         val_loader   = torch.utils.data.DataLoader(
-                                            lsp_lspet_data.LSP_Data('lsp', val_dir, sigma, stride,
+                                            lsp_lspet_data.LSP_Data(dataset, val_dir, sigma, stride,
                                             Mytransforms.Compose([Mytransforms.TestResized(368),])),
                                             batch_size  = 1, shuffle=True,
                                             num_workers = 1, pin_memory=True)
 
-        test_loader  = 0
+        test_loader  = None
 
     elif dataset == 'MPII':
         train_loader = torch.utils.data.DataLoader(
