@@ -257,7 +257,7 @@ parser.add_argument('--model_name', default='LSP_model', type=str)
 parser.add_argument('--model_arch', default='unipose', type=str)
 
 starter_epoch =    0
-epochs        =  13
+epochs        =  100
 
 args = parser.parse_args()
 
@@ -277,6 +277,12 @@ elif args.dataset == 'LSPet':
     args.pretrained = '/home/joris/CS4245 CV/UniPose/LSPet_model_best.pth.tar'
 
     args.model_name = 'LSPet_model'
+
+elif args.dataset == "FLIC":
+    args.train_dir  = '/FLIC/images'
+    args.val_dir    = '/FLIC/images'
+    args.test_dir   = '/FLIC/images'
+
 elif args.dataset == 'MPII':
     args.train_dir  = '/PATH/TO/MPIII/TRAIN'
     args.val_dir    = '/PATH/TO/MPIII/VAL'
