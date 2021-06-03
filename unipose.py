@@ -47,7 +47,7 @@ class Trainer(object):
         self.workers      = 1
         self.weight_decay = 0.0005
         self.momentum     = 0.9
-        self.batch_size   = 4
+        self.batch_size   = 4   #TODO
         self.lr           = 0.0001
         self.gamma        = 0.333
         self.step_size    = 13275
@@ -60,6 +60,8 @@ class Trainer(object):
             self.numClasses  = 14
         elif self.dataset == "LSPet":
             self.numClasses = 14
+        elif self.dataset == "Flic":
+            self.numClasses = 11
         elif self.dataset == "MPII":
             self.numClasses  = 16
 
@@ -257,11 +259,11 @@ parser.add_argument('--model_name', default='LSP_model', type=str)
 parser.add_argument('--model_arch', default='unipose', type=str)
 
 starter_epoch =    0
-epochs        =  100
+epochs        =  1  #TODO
 
 args = parser.parse_args()
 
-args.dataset = 'LSPet'
+args.dataset = 'Flic'
 
 if args.dataset == 'LSP':
     args.train_dir  = '/home/joris/CS4245 CV/LSP_dataset/images/test'
@@ -269,28 +271,29 @@ if args.dataset == 'LSP':
     args.test_dir   = '/home/joris/CS4245 CV/LSP_dataset/images/test'
     # args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
     args.pretrained = '/home/joris/CS4245 CV/UniPose/LSP_model_best.pth.tar'
+
 elif args.dataset == 'LSPet':
     args.train_dir = '/home/joris/CS4245 CV/LSPet_dataset/images/train'
     args.val_dir = '/home/joris/CS4245 CV/LSPet_dataset/images/validation'
     args.test_dir = None
-    args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
-    args.pretrained = '/home/joris/CS4245 CV/UniPose/LSPet_model_best.pth.tar'
-
+    # args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
+    # args.pretrained = '/home/joris/CS4245 CV/UniPose/LSPet_model_best.pth.tar'
     args.model_name = 'LSPet_model'
 
-elif args.dataset == "FLIC":
-    args.train_dir  = '/FLIC/images'
-    args.val_dir    = '/FLIC/images'
-    args.test_dir   = '/FLIC/images'
+elif args.dataset == "Flic":
+    args.train_dir  = '/home/joris/CS4245 CV/Flic_dataset/images'
+    args.val_dir    = '/home/joris/CS4245 CV/Flic_dataset/images'
+    args.test_dir = None
+    args.model_name = 'Flic_model'
 
 elif args.dataset == 'MPII':
     args.train_dir  = '/PATH/TO/MPIII/TRAIN'
     args.val_dir    = '/PATH/TO/MPIII/VAL'
 
 trainer = Trainer(args)
-# for epoch in range(starter_epoch, epochs):
-#     trainer.training(epoch)
-#     trainer.validation(epoch)
+for epoch in range(starter_epoch, epochs):
+    trainer.training(epoch)
+    trainer.validation(epoch)
 	
 # Uncomment for inference, demo, and samples for the trained model:
-trainer.test(0)
+# trainer.test(0)

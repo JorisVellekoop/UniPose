@@ -8,6 +8,7 @@ from utils       import penn_action_data     as penn_action
 # from utils       import ntid_data            as ntid_data
 # from utils       import posetrack_data       as posetrack_data
 from utils       import bbc_data             as bbc_data
+from utils       import Flic as Flic
 import utils.Mytransforms as Mytransforms
 import torch.nn.functional as F
 import math
@@ -241,6 +242,21 @@ def getDataloader(dataset, train_dir, val_dir, test_dir, sigma, stride, workers,
                                             num_workers = 1, pin_memory=True)
 
         test_loader  = None
+
+    if dataset == 'Flic':
+        train_loader = torch.utils.data.DataLoader(
+            Flic.Flic(train_dir, sigma, stride,
+                                    Mytransforms.Compose([Mytransforms.RandomHorizontalFlip(), ])),
+            batch_size=batch_size, shuffle=True,
+            num_workers=workers, pin_memory=True)
+
+        val_loader = torch.utils.data.DataLoader(
+            Flic.Flic(val_dir, sigma, stride,
+                                    Mytransforms.Compose([Mytransforms.TestResized(368), ])),
+            batch_size=1, shuffle=True,
+            num_workers=1, pin_memory=True)
+
+        test_loader = None
 
     elif dataset == 'MPII':
         train_loader = torch.utils.data.DataLoader(

@@ -1,4 +1,5 @@
 import scipy.io as sio
+import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import math
@@ -12,7 +13,7 @@ def guassian_kernel(size_w, size_h, center_x, center_y, sigma):
     return np.exp(-D2 / 2.0 / sigma / sigma)
 
 class Flic():
-    def __init__(self, root_dir, sigma,stride, transform=None):
+    def __init__(self, root_dir, sigma, stride, transformer=None):
         self.width = 480
         self.heigth = 720
         
@@ -20,10 +21,11 @@ class Flic():
         self.stride = stride
         
         self.root_dir = root_dir
-        self.transform = transform
+        self.transformer = transformer
         self.sigma = sigma
-        mat2 = sio.loadmat("test.mat")
-        self.data_file = data = mat2['loading2'][0]
+        # mat2 = sio.loadmat(os.path.join(self.root_dir, 'test.mat'))
+        # mat2 = sio.loadmat("test.mat")
+        self.data_file = sio.loadmat(os.path.join(self.root_dir, 'test.mat'))['loading2'][0]
         
         self.keys = keys = ['lsho',
                             'lelb',
@@ -55,9 +57,9 @@ class Flic():
                             'mllleg',
                             'mrlleg']
         
-    def __getitem__(self,index):
-        image_path= ("images/" + self.data_file[index]['filepath'][0])
-        image = np.array(cv2.resize(cv2.imread(image_path),(368,368)))
+    def __getitem__(self, index):
+        image_path= os.path.join(self.root_dir, self.data_file[index]['filepath'][0])
+        image = np.array(cv2.resize(cv2.imread(image_path),(368,368)), dtype=np.float32)
         #image = np.array(Image.open(image_path))
         
         center = [368/2,368/2] ##THis i am unsure about
@@ -89,19 +91,14 @@ class Flic():
         center_map[center_map > 1] = 1
         center_map[center_map < 0.0099] = 0
         centermap[:, :, 0] = center_map
-        
-        image2 = image
-        
+
         image = Mytransforms.normalize(Mytransforms.to_tensor(image), [0, 0, 0],
                                      [265, 265, 265])
         heatmap   = Mytransforms.to_tensor(heatmap)
         centermap = Mytransforms.to_tensor(centermap)
-        
-        image = image.permute(1,2,0)
-        return image, heatmap, centermap, image_path, image2
 
-flic = Flic("/images",1,1,None)
+        return image, heatmap, centermap, image_path, 0, 0
 
-image, heatmap, centermap, image_path, image2 = flic.__getitem__(20)
-plt.imshow(image.numpy())
+    def __len__(self):
+        return len(self.data_file) #TODO
 
