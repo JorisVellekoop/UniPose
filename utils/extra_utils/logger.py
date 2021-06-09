@@ -101,7 +101,7 @@ class LoggerMonitor(object):
                     
 if __name__ == '__main__':
     # # Example
-    # logger = Logger('test.txt')
+    # logger = Logger('validation.txt')
     # logger.set_names(['Train loss', 'Valid loss','Test loss'])
 
     # length = 100
@@ -125,4 +125,4 @@ if __name__ == '__main__':
 
     monitor = LoggerMonitor(paths)
     monitor.plot(names=field)
-    savefig('test.eps')
+    savefig('validation.eps')

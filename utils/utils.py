@@ -11,6 +11,7 @@ from utils       import bbc_data             as bbc_data
 from utils       import Flic as Flic
 import utils.Mytransforms as Mytransforms
 import torch.nn.functional as F
+import torch.nn as nn
 import math
 import torch
 import shutil
@@ -297,13 +298,13 @@ def getDataloader(dataset, train_dir, val_dir, test_dir, sigma, stride, workers,
 
     elif dataset == 'Penn_Action':
         train_loader = torch.utils.data.DataLoader(
-                                            penn_action.Penn_Action(train_dir, sigma, batch_size, True,
+                                            penn_action.Penn_Action(train_dir, sigma, stride, batch_size, True,
                                             Mytransforms.Compose([Mytransforms.TestResized(368),])),
                                             batch_size  = 1, shuffle=True,
                                             num_workers = workers, pin_memory=True)
     
         val_loader   = torch.utils.data.DataLoader(
-                                            penn_action.Penn_Action(val_dir, sigma, batch_size, False,
+                                            penn_action.Penn_Action(val_dir, sigma, stride, batch_size, False,
                                             Mytransforms.Compose([Mytransforms.TestResized(368),])),
                                             batch_size  = 1, shuffle=True,
                                             num_workers = 1, pin_memory=True)
@@ -780,7 +781,7 @@ def get_model_summary(model, *input_tensors, item_length=26, verbose=False):
                 ModuleDetails(
                     name=layer_name,
                     input_size=list(input[0].size()),
-                    output_size=list(output.size()),
+                    output_size=list(output),
                     num_parameters=params,
                     multiply_adds=flops)
             )

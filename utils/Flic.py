@@ -23,10 +23,14 @@ class Flic():
         self.root_dir = root_dir
         self.transformer = transformer
         self.sigma = sigma
-        # mat2 = sio.loadmat(os.path.join(self.root_dir, 'test.mat'))
-        # mat2 = sio.loadmat("test.mat")
-        self.data_file = sio.loadmat(os.path.join(self.root_dir, 'test.mat'))['loading2'][0]
-        
+        # mat2 = sio.loadmat(os.path.join(self.root_dir, 'validation.mat'))
+        # mat2 = sio.loadmat("validation.mat")
+        data = sio.loadmat(os.path.join(self.root_dir, 'joints.mat'))
+        if 'training' in data:
+            self.data_file = data['training'][0]
+        elif 'testing' in data:
+            self.data_file = data['testing'][0]
+
         self.keys = keys = ['lsho',
                             'lelb',
                             'lwri',

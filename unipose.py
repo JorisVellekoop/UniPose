@@ -47,7 +47,7 @@ class Trainer(object):
         self.workers      = 1
         self.weight_decay = 0.0005
         self.momentum     = 0.9
-        self.batch_size   = 4   #TODO
+        self.batch_size   = 2   #TODO
         self.lr           = 0.0001
         self.gamma        = 0.333
         self.step_size    = 13275
@@ -64,6 +64,8 @@ class Trainer(object):
             self.numClasses = 11
         elif self.dataset == "MPII":
             self.numClasses  = 16
+        elif self.dataset == "Penn_Action":
+            self.numClasses = 13
 
         self.train_loader, self.val_loader, self.test_loader = getDataloader(self.dataset, self.train_dir,
             self.val_dir, self.test_dir, self.sigma, self.stride, self.workers, self.batch_size)
@@ -99,8 +101,8 @@ class Trainer(object):
         self.bestPCKh = 0
 
         # Print model summary and metrics
-        dump_input = torch.rand((1, 3, 368, 368))
-        # print(get_model_summary(self.model, dump_input))
+        dump_input = torch.rand((1, 3, 368, 368)).cuda()
+        print(get_model_summary(self.model, dump_input))
 
     def training(self, epoch):
         train_loss = 0.0
@@ -157,7 +159,7 @@ class Trainer(object):
             heat = self.model(input_var)
             loss_heat   = self.criterion(heat,  heatmap_var)
 
-            loss = loss_heat
+            # loss = loss_heat
 
             val_loss += loss_heat.item()
 
@@ -205,8 +207,8 @@ class Trainer(object):
 
         for idx in range(1):
             print(idx,"/",2000)
-            img_path = self.test_dir + '/*.jpg'
-            img_path = '/home/joris/CS4245 CV/LSP_dataset/images/test/im1551.jpg'
+            # img_path = self.test_dir + '/*.jpg'
+            img_path = '/home/joris/CS4245 CV/LSP_dataset/images/test/im1552.jpg'
 
             center   = [184, 184]
             img  = np.array(cv2.resize(cv2.imread(img_path),(368,368)), dtype=np.float32)
@@ -235,11 +237,13 @@ class Trainer(object):
             heat = heat[0].transpose(1,2,0)
 
 
-            for i in range(heat.shape[0]):
-                for j in range(heat.shape[1]):
-                    for k in range(heat.shape[2]):
-                        if heat[i,j,k] < 0:
-                            heat[i,j,k] = 0
+            # for i in range(heat.shape[0]):
+            #     for j in range(heat.shape[1]):
+            #         for k in range(heat.shape[2]):
+            #             if heat[i,j,k] < 0:
+            #                 heat[i,j,k] = 0
+
+            heat[heat < 0] = 0
                         
 
             im       = cv2.resize(cv2.imread(img_path),(368,368))
@@ -255,36 +259,45 @@ parser.add_argument('--pretrained', default=None,type=str, dest='pretrained')
 parser.add_argument('--dataset', type=str, dest='dataset', default='LSP')
 parser.add_argument('--train_dir', default='/PATH/TO/TRAIN',type=str, dest='train_dir')
 parser.add_argument('--val_dir', type=str, dest='val_dir', default='/PATH/TO/LSP/VAL')
+parser.add_argument('--test_dir', type=str, dest='test_dir', default='/PATH/TO/LSP/TEST')
 parser.add_argument('--model_name', default='LSP_model', type=str)
 parser.add_argument('--model_arch', default='unipose', type=str)
 
-starter_epoch =    0
+starter_epoch =  0
 epochs        =  1  #TODO
 
 args = parser.parse_args()
 
-args.dataset = 'Flic'
+args.dataset = 'LSP'
 
 if args.dataset == 'LSP':
-    args.train_dir  = '/home/joris/CS4245 CV/LSP_dataset/images/test'
+    args.train_dir  = '/home/joris/CS4245 CV/LSP_dataset/images/train'
     args.val_dir    = '/home/joris/CS4245 CV/LSP_dataset/images/validation'
-    args.test_dir   = '/home/joris/CS4245 CV/LSP_dataset/images/test'
-    # args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
-    args.pretrained = '/home/joris/CS4245 CV/UniPose/LSP_model_best.pth.tar'
+    args.test_dir   = None
+    args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
+    # args.pretrained = '/home/joris/CS4245 CV/UniPose/LSP_model_best.pth.tar'
 
 elif args.dataset == 'LSPet':
     args.train_dir = '/home/joris/CS4245 CV/LSPet_dataset/images/train'
     args.val_dir = '/home/joris/CS4245 CV/LSPet_dataset/images/validation'
     args.test_dir = None
-    # args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
+    args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
     # args.pretrained = '/home/joris/CS4245 CV/UniPose/LSPet_model_best.pth.tar'
     args.model_name = 'LSPet_model'
 
 elif args.dataset == "Flic":
-    args.train_dir  = '/home/joris/CS4245 CV/Flic_dataset/images'
-    args.val_dir    = '/home/joris/CS4245 CV/Flic_dataset/images'
+    args.train_dir  = '/home/joris/CS4245 CV/Flic_dataset/images/train'
+    args.val_dir    = '/home/joris/CS4245 CV/Flic_dataset/images/validation'
     args.test_dir = None
     args.model_name = 'Flic_model'
+
+elif args.dataset == "Penn_Action":
+    args.train_dir  = '/home/joris/CS4245 CV/Penn_Action_dataset/train/'
+    args.val_dir    = '/home/joris/CS4245 CV/Penn_Action_dataset/validation/'
+    args.test_dir = None
+    args.model_name = 'Penn_Action_model'
+    args.root_dir = '/home/joris/CS4245 CV/Penn_Action_dataset/'
+    args.pretrained = None
 
 elif args.dataset == 'MPII':
     args.train_dir  = '/PATH/TO/MPIII/TRAIN'

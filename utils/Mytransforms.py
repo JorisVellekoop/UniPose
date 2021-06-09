@@ -146,7 +146,7 @@ class RandomResized_NTID(object):
         return resize(img, kpt, center, ratio)
 
 class TestResized(object):
-    """Resize the given numpy.ndarray to the size for test.
+    """Resize the given numpy.ndarray to the size for validation.
 
     Args:
         size: the size to resize.

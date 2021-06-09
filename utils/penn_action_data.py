@@ -21,7 +21,7 @@ def guassian_kernel(size_w, size_h, center_x, center_y, sigma):
 
 
 class Penn_Action(data.Dataset):
-    def __init__(self, root_dir, sigma, frame_memory, is_train, transform=None):
+    def __init__(self, root_dir, sigma, stride, frame_memory, is_train, transform=None):
         self.width     = 368
         self.height    = 368
         self.transform = transform
@@ -29,28 +29,29 @@ class Penn_Action(data.Dataset):
         self.sigma     = sigma
         self.parts_num = 13
         self.seqTrain  = frame_memory
+        self.stride = stride
 
         self.root_dir     = root_dir
         self.label_dir    = root_dir + 'labels/'
         self.frame_dir    = root_dir + 'frames/' 
-        self.train_dir    = root_dir + 'train/' 
-        self.val_dir      = root_dir + 'val/' 
+        # self.train_dir    = root_dir + 'train/'
+        # self.val_dir      = root_dir + 'validation/'
 
         if self.is_train is True:
             self.data_dir = root_dir + 'train/'
         else:
-            self.data_dir = root_dir + 'val/'
+            self.data_dir = root_dir + 'validation/'
 
-        self.frames_data  = os.listdir(self.data_dir)
+        self.frames_data  = os.listdir(self.frame_dir)
 
 
     def __getitem__(self, index):
         frames = self.frames_data[index]
-        data   = np.load(os.path.join(self.data_dir, frames)).item()
+        data   = scipy.io.loadmat(os.path.join(self.label_dir, frames + ".mat"))
 
         nframes    = data['nframes']    # 151
-        framespath = data['framepath']
-        dim        = data['dimensions'] # [360,480]
+        framespath = os.path.join(self.frame_dir, frames) #data['framepath']
+        dim        = data['dimensions'].squeeze() # [360,480]
         x          = data['x']          # 151 * 13
         y          = data['y']          # 151 * 13
         visibility = data['visibility'] # 151 * 13
@@ -73,14 +74,13 @@ class Penn_Action(data.Dataset):
 
         for i in range(self.seqTrain):
             # read image
-            img_path = os.path.join('/home/bm3768/Desktop/Pose/'+framespath[34:],\
-                                    '%06d' % (start_index + i + 1) + '.jpg')
+            img_path = os.path.join(framespath, '%06d' % (start_index + i + 1) + '.jpg')
 
             img_paths.append(img_path)
             img = np.array(Image.open(img_path), dtype=np.float32)  # Image
 
 
-            img_path  = self.images_dir + variable['img_paths']
+            # img_path  = self.images_dir + variable['img_paths']
             
             # BBox was added to the labels by the authors to perform additional training and testing, as referred in the paper.
             # Intentionally left as comment since it is not part of the dataset.
@@ -106,11 +106,11 @@ class Penn_Action(data.Dataset):
             center_y = int(label_size/2)
 
 
-            kps[13] = [int((bbox[i,0]+bbox[i,2])/2),int((bbox[i,1]+bbox[i,3])/2),1]
-            kps[14] = [bbox[i,0],bbox[i,1],1] 
-            kps[15] = [bbox[i,0],bbox[i,3],1] 
-            kps[16] = [bbox[i,2],bbox[i,1],1] 
-            kps[17] = [bbox[i,2],bbox[i,3],1] 
+            # kps[13] = [int((bbox[i,0]+bbox[i,2])/2),int((bbox[i,1]+bbox[i,3])/2),1]
+            # kps[14] = [bbox[i,0],bbox[i,1],1]
+            # kps[15] = [bbox[i,0],bbox[i,3],1]
+            # kps[16] = [bbox[i,2],bbox[i,1],1]
+            # kps[17] = [bbox[i,2],bbox[i,3],1]
 
             center   = [center_x, center_y]
 
@@ -161,13 +161,12 @@ class Penn_Action(data.Dataset):
 
 
         for i in range(self.seqTrain):
-            images[i] = Mytransforms.normalize(images[i], [128.0, 128.0, 128.0],[256.0, 256.0, 256.0])
+            images[i] = Mytransforms.normalize(images[i], [128.0, 128.0, 128.0], [256.0, 256.0, 256.0])
 
 
         label_map[i] = transforms.ToTensor()(heatmap)
 
-
-        return images, label_map, centermaps, img_paths#, 0, boxes
+        return images, label_map, centermaps, img_paths, 0, 0 #boxes
 
 
     def isNotOnPlane(self, x, y, width, height):
