@@ -108,6 +108,8 @@ def accuracy(output, target, thr_PCK, thr_PCKh, dataset, hm_type='gaussian', thr
 		headLength = np.linalg.norm(target[0,1,:] - neck)
 	elif dataset == "MPII":
 		headLength = np.linalg.norm(target[0,9,:] - target[0,10,:])
+	elif dataset =="Flic":
+		headLength = 2.369 * np.linalg.norm(target[0,9,:] - target[0,10,:])
 
 
 	for i in range(len(idx)):
@@ -154,6 +156,23 @@ def accuracy(output, target, thr_PCK, thr_PCKh, dataset, hm_type='gaussian', thr
 
 	elif dataset == "MPII":
 		torso  = np.linalg.norm(target[0,7,0] - target[0,8,0])
+
+	elif dataset == "Flic":
+		# chest = [(target[0,1,0]+target[0,4,0])/2, (target[0,1,1]+target[0,4,1])/2]
+		# pelvis = [(target[0,7,0]+target[0,8,0])/2, (target[0,7,1]+target[0,8,1])/2]
+		torso = np.linalg.norm(target[0,7,:] - target[0,8,:])
+		# import matplotlib.pyplot as plt
+		import time
+		# plt.plot(target[0,1:,0], target[0,1:,1])
+		# plt.plot(target[0,7:9,0], target[0,7:9,1], color='red')
+		# plt.show()
+		#
+		# for part in [head, chest, neck, pelvis]:
+		# 	print(part)
+		# 	plt.plot(part[0], part[1], '.')
+		# plt.legend(['all', 'head', 'chest', 'neck', 'pelvis'])
+		# plt.show()
+		# time.sleep(1000)
 
 	for i in range(len(idx)):
 		PCK[i] = dist_acc(dists[idx[i]], thr_PCK*torso)

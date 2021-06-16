@@ -108,14 +108,14 @@ def get_kpts(maps, img_h = 368.0, img_w = 368.0):
     return kpts
 
 
-def draw_paint(im, kpts, mapNumber, epoch, model_arch, dataset):
+def draw_paint(img_path, kpts, mapNumber, epoch, model_arch, dataset):
 
            #       RED           GREEN           RED          YELLOW          YELLOW          PINK          GREEN
     colors = [[000,000,255], [000,255,000], [000,000,255], [255,255,000], [255,255,000], [255,000,255], [000,255,000],\
               [255,000,000], [255,255,000], [255,000,255], [000,255,000], [000,255,000], [000,000,255], [255,255,000], [255,000,000]]
            #       BLUE          YELLOW          PINK          GREEN          GREEN           RED          YELLOW           BLUE
 
-    if dataset == "LSP":
+    if dataset == "LSP" or dataset == "LSPet":
         limbSeq = [[13, 12], [12, 9], [12, 8], [9, 10], [8, 7], [10,11], [7, 6], [12, 3],\
                     [12, 2], [ 2, 1], [ 1, 0], [ 3, 4], [4,  5]]#, [15,16], [16,18], [17,18], [15,17]]
         # kpts[15][0] = kpts[15][0]  - 25
@@ -165,8 +165,13 @@ def draw_paint(im, kpts, mapNumber, epoch, model_arch, dataset):
         colors = [[000,255,000], [000,000,255], [255,000,000], [000,255,000], [255,255,51], [255,000,255],\
                   [000,000,255], [000,000,255], [000,000,255], [000,000,255]]
 
+    elif dataset == "Flic":
+        # limbSeq = [[0, 1], [1, 2], [3, 4], [4, 5], [6, 7], [8, 9], [9, 10], [0, 6], [3, 7]]
+        limbSeq = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10]]
+        # print(kpts, limbSeq)
 
-    # im = cv2.resize(cv2.imread(img_path),(368,368))
+
+    im = cv2.resize(cv2.imread(img_path),(368,368))
     # draw points
     for k in kpts:
         x = k[0]
@@ -486,6 +491,23 @@ def printAccuracies(mAP, AP, mPCKh, PCKh, mPCK, PCK, dataset):
         print("mPCKh:  %.2f%%" % (mPCKh*100))
         print("APs: BG = %2.2f%%, HD = %2.2f%%, LH = %2.2f%%, RH = %2.2f%%, LE = %2.2f%% RE = %2.2f%%, LS = %2.2f%%, RS = %2.2f%%,"\
             % (PCKh[0]*100,PCKh[1]*100,PCKh[2]*100,PCKh[3]*100,PCKh[4]*100,PCKh[5]*100,PCKh[6]*100,PCKh[7]*100))
+
+    if dataset == "Flic":
+        print("\nmAP:   %.2f%%" % (mAP*100))
+        print(AP[0]*100,AP[1]*100,AP[2]*100,AP[3]*100,AP[4]*100)
+        print(AP[5]*100,AP[6]*100,AP[7]*100,AP[8]*100,AP[9]*100)
+        print(AP[10]*100)
+
+
+        print("mPCK:  %.2f%%" % (mPCK*100))
+        print(PCK[0]*100,PCK[1]*100,PCK[2]*100,PCK[3]*100,PCK[4]*100)
+        print(PCK[5]*100,PCK[6]*100,PCK[7]*100,PCK[8]*100,PCK[9]*100)
+        print(PCK[10]*100)
+
+        print("mPCKh: %.2f%%" % (mPCKh*100))
+        print(PCKh[0]*100,PCKh[1]*100,PCKh[2]*100,PCKh[3]*100,PCKh[4]*100)
+        print(PCKh[5]*100,PCKh[6]*100,PCKh[7]*100,PCKh[8]*100,PCKh[9]*100)
+        print(PCKh[10]*100)
 
 
 

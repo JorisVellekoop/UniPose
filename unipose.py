@@ -137,11 +137,13 @@ class Trainer(object):
             if i == 10000:
             	break
 
+        return train_loss
+
     def validation(self, epoch):
+        val_loss = 0.0
         self.model.eval()
         tbar = tqdm(self.val_loader, desc='\r')
-        val_loss = 0.0
-        
+
         AP    = np.zeros(self.numClasses+1)
         PCK   = np.zeros(self.numClasses+1)
         PCKh  = np.zeros(self.numClasses+1)
@@ -199,6 +201,7 @@ class Trainer(object):
 
         print("Best AP = %.2f%%; PCK = %2.2f%%; PCKh = %2.2f%%" % (self.isBest*100, self.bestPCK*100,self.bestPCKh*100))
 
+        return val_loss, [mAP, mPCK, mPCKh]
 
 
     def test(self,epoch):
@@ -208,7 +211,8 @@ class Trainer(object):
         for idx in range(1):
             print(idx,"/",2000)
             # img_path = self.test_dir + '/*.jpg'
-            img_path = '/home/joris/CS4245 CV/LSP_dataset/images/test/im1552.jpg'
+            img_path = '/home/joris/CS4245 CV/LSPet_dataset/images/validation/im0002.jpg'
+            # img_path = '/home/joris/CS4245 CV/Flic_dataset/images/train/the-departed-00087001.jpg'
 
             center   = [184, 184]
             img  = np.array(cv2.resize(cv2.imread(img_path),(368,368)), dtype=np.float32)
@@ -230,7 +234,7 @@ class Trainer(object):
             heat = F.interpolate(heat, size=input_var.size()[2:], mode='bilinear', align_corners=True)
 
             kpts = get_kpts(heat, img_h=368.0, img_w=368.0)
-            draw_paint(cv2.imread(img_path), kpts, idx, epoch, self.model_arch, self.dataset)
+            draw_paint(img_path, kpts, idx, epoch, self.model_arch, self.dataset)
 
             heat = heat.detach().cpu().numpy()
 
@@ -248,6 +252,8 @@ class Trainer(object):
 
             im       = cv2.resize(cv2.imread(img_path),(368,368))
 
+            # print(heat.shape, im.shape)
+
             heatmap = []
             for i in range(self.numClasses+1):
                 heatmap = cv2.applyColorMap(np.uint8(255*heat[:,:,i]), cv2.COLORMAP_JET)
@@ -263,12 +269,9 @@ parser.add_argument('--test_dir', type=str, dest='test_dir', default='/PATH/TO/L
 parser.add_argument('--model_name', default='LSP_model', type=str)
 parser.add_argument('--model_arch', default='unipose', type=str)
 
-starter_epoch =  0
-epochs        =  1  #TODO
-
 args = parser.parse_args()
 
-args.dataset = 'LSP'
+args.dataset = 'Flic'
 
 if args.dataset == 'LSP':
     args.train_dir  = '/home/joris/CS4245 CV/LSP_dataset/images/train'
@@ -281,8 +284,8 @@ elif args.dataset == 'LSPet':
     args.train_dir = '/home/joris/CS4245 CV/LSPet_dataset/images/train'
     args.val_dir = '/home/joris/CS4245 CV/LSPet_dataset/images/validation'
     args.test_dir = None
-    args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
-    # args.pretrained = '/home/joris/CS4245 CV/UniPose/LSPet_model_best.pth.tar'
+    # args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/UniPose_LSP.tar'
+    args.pretrained = '/home/joris/CS4245 CV/Weights LSPet/LSPet_model_best.pth(4).tar'
     args.model_name = 'LSPet_model'
 
 elif args.dataset == "Flic":
@@ -290,6 +293,7 @@ elif args.dataset == "Flic":
     args.val_dir    = '/home/joris/CS4245 CV/Flic_dataset/images/validation'
     args.test_dir = None
     args.model_name = 'Flic_model'
+    args.pretrained = '/home/joris/CS4245 CV/UniPose Weights/Flic_model_best.pth.tar'
 
 elif args.dataset == "Penn_Action":
     args.train_dir  = '/home/joris/CS4245 CV/Penn_Action_dataset/train/'
@@ -303,10 +307,41 @@ elif args.dataset == 'MPII':
     args.train_dir  = '/PATH/TO/MPIII/TRAIN'
     args.val_dir    = '/PATH/TO/MPIII/VAL'
 
+starter_epoch =  0
+epochs        =  3  #TODO
+
+acc = np.empty((3, epochs))
+loss = np.empty((2, epochs))
+
 trainer = Trainer(args)
-for epoch in range(starter_epoch, epochs):
-    trainer.training(epoch)
-    trainer.validation(epoch)
-	
+# for epoch in range(starter_epoch, epochs):
+    # loss[0, epoch] = trainer.training(epoch)
+    # loss[1, epoch], acc[:, epoch] = trainer.validation(epoch)
+
 # Uncomment for inference, demo, and samples for the trained model:
-# trainer.test(0)
+trainer.test(0)
+
+
+# import matplotlib.pyplot as plt
+#
+# plt.plot(acc.T)
+# plt.title('Learning curve metrics')
+# plt.legend(['AP', 'PCK@0.2', 'PCKh@0.5'])
+# plt.xlabel('Epoch #')
+# plt.ylabel('Accuracy')
+#
+# plt.savefig('LearningCurveMetrics.png')
+# plt.show()
+#
+# fig, ax1 = plt.subplots()
+# ax2 = ax1.twinx()
+# ax1.plot(loss[0,: ].T, color = 'blue', label = 'Training Loss')
+# ax2.plot(loss[1, :].T, color = 'red', label = 'Validation Loss')
+# fig.legend(loc="upper right")
+# ax1.set_xlabel('Epoch #')
+# ax1.set_ylabel('Training Loss')
+# ax2.set_ylabel('Validation Loss')
+# plt.title('Learning curve losses')
+#
+# plt.savefig('LearningCurveLosses.png')
+# plt.show()

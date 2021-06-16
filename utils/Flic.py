@@ -63,26 +63,27 @@ class Flic():
         
     def __getitem__(self, index):
         image_path= os.path.join(self.root_dir, self.data_file[index]['filepath'][0])
-        image = np.array(cv2.resize(cv2.imread(image_path),(368,368)), dtype=np.float32)
+        image = cv2.imread(image_path)
         #image = np.array(Image.open(image_path))
         
         center = [368/2,368/2] ##THis i am unsure about
-        
-        height, width, _ = image.shape
-        
+
         all_coordinates = self.data_file[index]['coords']
-        real_coordinates = []
-        for i in range(all_coordinates.shape[1]):
-            if math.isnan(all_coordinates[0,i]) == False:
-                #real_coordinates.append([self.keys[i],all_coordinates[0,i],all_coordinates[1,i]])
-                real_coordinates.append([all_coordinates[0,i],all_coordinates[1,i]])
-        kpt = real_coordinates
-        
-        heatmap = np.zeros((int(height/self.stride), int(width/self.stride), int(len(kpt)+1)), dtype=np.float32)
-        for i in range(len(kpt)):
+        kpt = all_coordinates[np.isnan(all_coordinates) == False]
+        kpt = kpt.reshape((2, int(len(kpt) / 2)))
+
+        if image.shape[0] != 368 or image.shape[1] != 368:
+            kpt[0, :] *= (368. / image.shape[1])
+            kpt[1, :] *= (368. / image.shape[0])
+            image = cv2.resize(image, (368, 368))
+
+        height, width, _ = image.shape
+
+        heatmap = np.zeros((int(height/self.stride), int(width/self.stride), int(kpt.shape[1]+1)), dtype=np.float32)
+        for i in range(kpt.shape[1]):
             # resize from 368 to 46
-            x = int(kpt[i][0]) * 1.0 / self.stride
-            y = int(kpt[i][1]) * 1.0 / self.stride
+            x = int(kpt[0, i]) * 1.0 / self.stride
+            y = int(kpt[1, i]) * 1.0 / self.stride
             heat_map = guassian_kernel(size_h=int(height/self.stride),size_w=int(width/self.stride), center_x=x, center_y=y, sigma=self.sigma)
             heat_map[heat_map > 1] = 1
             heat_map[heat_map < 0.0099] = 0
